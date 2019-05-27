@@ -2,7 +2,8 @@ import datetime
 import picamera
 import pygame
 import io
-
+from message_process import BtManager
+from image_process import ImageConverter
 
 # Init pygame
 pygame.init()
@@ -93,6 +94,19 @@ def show_interface():
     #background.blit(text, textpos)
     screen.blit(background, (0, 0))
 
+def show_printing_message():
+    screen.blit(background, (0,0))
+
+def print_photo(image_name):
+	bt_manager = BtManager('00:15:83:F3:D2:3A')
+	if bt_manager.connected:
+		bt_manager.sendDensityToBt(95)
+		bt_manager.sendPowerOffTimeToBt(0)
+		bt_manager.queryPowerOffTime()
+		img = ImageConverter.image2bmp(image_name)
+		bt_manager.sendImageToBt(img)
+		bt_manager.disconnect()		
+
 def _create_file_name(timestamp):
     return str(timestamp).replace(' ', '') + '.jpeg'
 
@@ -111,6 +125,7 @@ while exitFlag:
 	        filename = _create_file_name(datetime.datetime.now())
                 camera.capture(filename)
 	        preview_button_pressed = False
+		print_photo(filename)
 
 
         if event.type is pygame.QUIT:
